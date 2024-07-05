@@ -1,0 +1,6 @@
+{
+  "remappings": {
+    "uniform-random-number/": "lib/pt-v5-prize-pool/lib/uniform-random-number/src/",
+    "prb-math/": "lib/pt-v5-prize-pool/lib/prb-math/src/"
+  }
+}
