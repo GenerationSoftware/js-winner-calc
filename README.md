@@ -7,7 +7,7 @@ A [TEVM](https://tevm.sh/)-assisted toolkit for efficiently calculating winners 
 This library is installable as an NPM package using the following command:
 
 ```
-npm i @GenerationSoftware/tevm-winner-calc
+npm i @generationsoftware/tevm-winner-calc
 ```
 
 ## How to Calculate Winners for a Vault
@@ -16,7 +16,7 @@ npm i @GenerationSoftware/tevm-winner-calc
 > This script batches RPC queries for a given vault, so you'll need to run it for each vault that you want to check prizes for. If you are querying results for many users, it is recommended to use a private RPC endpoint to avoid public rate limits.
 
 ```js
-import { computeWinners } from "@GenerationSoftware/tevm-winner-calc";
+import { computeWinners } from "@generationsoftware/tevm-winner-calc";
 
 const wins = await computeWinners({
   chainId: 10,
