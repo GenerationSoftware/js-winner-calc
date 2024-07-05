@@ -4,4 +4,5 @@ lib
 .rollup.cache
 .tevm
 tsconfig.tsbuildinfo
-output
+dist/**/*
+!dist/index.d.ts
