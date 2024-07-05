@@ -1,5 +1,5 @@
 {
-  "name": "tevm-winner-calc",
+  "name": "@generationsoftware/tevm-winner-calc",
   "version": "1.0.0",
   "description": "Calculates PoolTogether V5 winners with locally compiled solidity libraries using TEVM.",
   "main": "dist/index.js",
