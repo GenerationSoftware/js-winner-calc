@@ -1,4 +1,4 @@
-import {computeWinners} from "./output/index.js";
+import {computeWinners} from "./dist/index.js";
 
 const main = async () => {
   const winners = await computeWinners({
@@ -13,7 +13,7 @@ const main = async () => {
       "0xf756e4368a03627EAc9B0c474c8420794f429BA1",
       "0xfB424B3c08e5D1205C66d5140781BD718f7F9860"
     ],
-    blockNumber: 121970626,
+    blockNumber: 121970626n,
     debug: true
   });
   console.log(JSON.stringify(winners, null, '  '));
