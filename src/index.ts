@@ -7,9 +7,12 @@ import { computeWinsForTier } from "./winCalculator";
 
 export type Winner = { user: Address, prizes: { [tier: number]: number[] } };
 
+const NUM_CANARY_TIERS = 2;
+
 /**
  * @notice Computes the winning picks given the following prize pool, vault, and user information.
  * @param param0 The params to run for the computation.
+ * @param param0.ignoreCanaries If true, the last two tiers (canary tiers) will be ignored. This speeds up the calculation significantly.
  * @param param0.multicallBatchSize The maximum size (in bytes) for each calldata chunk.
  * @param param0.blockNumber The block number to query at (requires an RPC node that supports historical queries)
  * @param param0.debug Enable debug logs
@@ -30,6 +33,7 @@ export const computeWinners = async ({
   prizePoolAddress,
   vaultAddress,
   userAddresses,
+  ignoreCanaries,
   multicallBatchSize,
   blockNumber,
   debug
@@ -39,6 +43,7 @@ export const computeWinners = async ({
   prizePoolAddress: Address,
   vaultAddress: Address,
   userAddresses: Address[],
+  ignoreCanaries?: boolean,
   multicallBatchSize?: number,
   blockNumber?: bigint,
   debug?: boolean
@@ -56,49 +61,51 @@ export const computeWinners = async ({
 
   await Promise.all(Object.keys(tierInfo).map(async (_tier) => {
     const tier = parseInt(_tier)
-    const vaultPortion = await getVaultPortion(client, prizePoolAddress, vaultAddress, { start: tierInfo[tier].startTwabDrawId, end: prizePoolInfo.lastAwardedDrawId })
-    const startTwabTimestamp = tierInfo[tier].startTwabTimestamp
-    if(cachedTwabs[startTwabTimestamp] === undefined) {
-      cachedTwabs[startTwabTimestamp] = getTwabs(
-        client,
-        prizePoolInfo.twabControllerAddress,
-        vaultAddress,
-        userAddresses,
-        { start: startTwabTimestamp, end: prizePoolInfo.lastAwardedDrawClosedAt },
-        { blockNumber }
-      )
-    }
-    const { vaultTotalSupplyTwab, userTwabs } = await cachedTwabs[startTwabTimestamp]
-    const chunkSize = Math.min(10_000, Math.ceil(1_000_000 / tierInfo[tier].indices)) // varies between 1-10000 based on prize count
-    const userChunks: (typeof userTwabs)[] = []
-    for (let chunk = 0; userChunks.length < Math.ceil(userTwabs.length / chunkSize); chunk++) {
-      userChunks.push(
-        userTwabs.slice(
-          chunk * chunkSize,
-          Math.min((chunk + 1) * chunkSize, userTwabs.length)
+    if (!ignoreCanaries || tier < prizePoolInfo.numTiers - NUM_CANARY_TIERS) {
+      const vaultPortion = await getVaultPortion(client, prizePoolAddress, vaultAddress, { start: tierInfo[tier].startTwabDrawId, end: prizePoolInfo.lastAwardedDrawId })
+      const startTwabTimestamp = tierInfo[tier].startTwabTimestamp
+      if(cachedTwabs[startTwabTimestamp] === undefined) {
+        cachedTwabs[startTwabTimestamp] = getTwabs(
+          client,
+          prizePoolInfo.twabControllerAddress,
+          vaultAddress,
+          userAddresses,
+          { start: startTwabTimestamp, end: prizePoolInfo.lastAwardedDrawClosedAt },
+          { blockNumber }
         )
-      )
-    }
-    for (const userChunk of userChunks) {
-      const chunkWins = await computeWinsForTier(tevmClient, {
-        winningRandomNumber: prizePoolInfo.randomNumber,
-        lastAwardedDrawId: prizePoolInfo.lastAwardedDrawId,
-        vaultAddress,
-        tier,
-        tierIndices: tierInfo[tier].indices,
-        tierOdds: tierInfo[tier].odds,
-        vaultPortion,
-        vaultTotalSupplyTwab,
-        users: userChunk.map(user => user.address),
-        userTwabs: userChunk.map(user => user.twab)
-      })
-      for (const win of chunkWins) {
-        if(!winnerMap.has(win.user)) {
-          winnerMap.set(win.user, { user: win.user, prizes: {} })
+      }
+      const { vaultTotalSupplyTwab, userTwabs } = await cachedTwabs[startTwabTimestamp]
+      const chunkSize = Math.min(10_000, Math.ceil(1_000_000 / tierInfo[tier].indices)) // varies between 1-10000 based on prize count
+      const userChunks: (typeof userTwabs)[] = []
+      for (let chunk = 0; userChunks.length < Math.ceil(userTwabs.length / chunkSize); chunk++) {
+        userChunks.push(
+          userTwabs.slice(
+            chunk * chunkSize,
+            Math.min((chunk + 1) * chunkSize, userTwabs.length)
+          )
+        )
+      }
+      for (const userChunk of userChunks) {
+        const chunkWins = await computeWinsForTier(tevmClient, {
+          winningRandomNumber: prizePoolInfo.randomNumber,
+          lastAwardedDrawId: prizePoolInfo.lastAwardedDrawId,
+          vaultAddress,
+          tier,
+          tierIndices: tierInfo[tier].indices,
+          tierOdds: tierInfo[tier].odds,
+          vaultPortion,
+          vaultTotalSupplyTwab,
+          users: userChunk.map(user => user.address),
+          userTwabs: userChunk.map(user => user.twab)
+        })
+        for (const win of chunkWins) {
+          if(!winnerMap.has(win.user)) {
+            winnerMap.set(win.user, { user: win.user, prizes: {} })
+          }
+          const userData = winnerMap.get(win.user) as Winner
+          if(!userData.prizes[tier]) { userData.prizes[tier] = [] }
+          userData.prizes[tier].push(win.prizeIndex)
         }
-        const userData = winnerMap.get(win.user) as Winner
-        if(!userData.prizes[tier]) { userData.prizes[tier] = [] }
-        userData.prizes[tier].push(win.prizeIndex)
       }
     }
   }))

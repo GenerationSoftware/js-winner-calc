@@ -49,6 +49,21 @@ The results will look like the following, with an array of **winners** and a map
 
 ## Optional Arguments
 
+### ignoreCanaries
+
+Ignores the last two tiers (canary tiers) when computing wins. Enabling this will significantly speed up the calculation, but should only be used if you have no need for canary tier wins in your application.
+
+#### Example:
+
+```js
+const winners = await computeWinners({
+  ...,
+  ignoreCanaries: true
+})
+```
+
+--------------------------------------------------------------------------------
+
 ### multicallBatchSize
 
 Set the `multicallBatchSize` argument in the input json file to limit multicall size (in bytes) for RPC calls. Different RPCs may have harsher limits than others.

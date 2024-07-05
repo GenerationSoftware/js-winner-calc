@@ -14,7 +14,8 @@ const main = async () => {
       "0xfB424B3c08e5D1205C66d5140781BD718f7F9860"
     ],
     blockNumber: 121970626n,
-    debug: true
+    debug: true,
+    ignoreCanaries: true
   });
   console.log(JSON.stringify(winners, null, '  '));
 }
