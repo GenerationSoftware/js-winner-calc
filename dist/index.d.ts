@@ -8,6 +8,7 @@ export type Winner = {
 /**
  * @notice Computes the winning picks given the following prize pool, vault, and user information.
  * @param param0 The params to run for the computation.
+ * @param param0.ignoreCanaries If true, the last two tiers (canary tiers) will be ignored. This speeds up the calculation significantly.
  * @param param0.multicallBatchSize The maximum size (in bytes) for each calldata chunk.
  * @param param0.blockNumber The block number to query at (requires an RPC node that supports historical queries)
  * @param param0.debug Enable debug logs
@@ -22,12 +23,13 @@ export type Winner = {
  * })
  * ```
  */
-export declare const computeWinners: ({ chainId, rpcUrl, prizePoolAddress, vaultAddress, userAddresses, multicallBatchSize, blockNumber, debug }: {
+export declare const computeWinners: ({ chainId, rpcUrl, prizePoolAddress, vaultAddress, userAddresses, ignoreCanaries, multicallBatchSize, blockNumber, debug }: {
     chainId: number;
     rpcUrl: string;
     prizePoolAddress: Address;
     vaultAddress: Address;
     userAddresses: Address[];
+    ignoreCanaries?: boolean;
     multicallBatchSize?: number;
     blockNumber?: bigint;
     debug?: boolean;
