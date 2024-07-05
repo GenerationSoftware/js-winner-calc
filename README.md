@@ -18,7 +18,7 @@ npm i @generationsoftware/tevm-winner-calc
 ```js
 import { computeWinners } from "@generationsoftware/tevm-winner-calc";
 
-const wins = await computeWinners({
+const winners = await computeWinners({
   chainId: 10,
   rpcUrl: "https://mainnet.optimism.io/",
   prizePoolAddress: "0xF35fE10ffd0a9672d0095c435fd8767A7fe29B55",
@@ -56,7 +56,7 @@ Set the `multicallBatchSize` argument in the input json file to limit multicall 
 #### Example:
 
 ```js
-const wins = await computeWinners({
+const winners = await computeWinners({
   ...,
   multicallBatchSize: 2048
 })
@@ -71,7 +71,7 @@ The `blockNumber` argument can be set to run the script at a specific block numb
 #### Example:
 
 ```js
-const wins = await computeWinners({
+const winners = await computeWinners({
   ...,
   blockNumber: 121970626n
 })
@@ -86,7 +86,7 @@ The `debug` argument is an optional boolean. When set, some extra logs will be i
 #### Example:
 
 ```js
-const wins = await computeWinners({
+const winners = await computeWinners({
   ...,
   debug: true
 })
