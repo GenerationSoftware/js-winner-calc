@@ -18,5 +18,6 @@
   "devDependencies": {
     "tslib": "^2.6.3",
     "typescript": "^5.5.3"
-  }
+  },
+  "files": ["dist/**/*, src/**/*, README.md, tsconfig.json"]
 }
