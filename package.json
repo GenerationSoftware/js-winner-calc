@@ -1,25 +1,21 @@
 {
-  "name": "@generationsoftware/tevm-winner-calc",
-  "version": "1.0.3",
-  "description": "Calculates PoolTogether V5 winners with locally compiled solidity libraries using TEVM.",
+  "name": "@generationsoftware/js-winner-calc",
+  "version": "1.1.0",
+  "description": "Calculates PoolTogether V5 winners in JavaScript.",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "dev": "rollup -c -w",
-    "build": "rollup -c",
+    "dev": "tsc -w",
+    "build": "tsc",
     "test": "npm run build && node test.js"
   },
   "keywords": [],
   "author": "G9 Software Inc.",
   "license": "MIT",
   "dependencies": {
-    "tevm": "^1.1.0-next.89",
     "viem": "^2.17.0"
   },
   "devDependencies": {
-    "rollup": "^4.18.0",
-    "@rollup/plugin-typescript": "^11.1.6",
-    "solc": "0.8.24",
     "tslib": "^2.6.3",
     "typescript": "^5.5.3"
   }

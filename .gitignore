@@ -1,8 +1,4 @@
 node_modules
-lib
 .env
-.rollup.cache
-.tevm
 tsconfig.tsbuildinfo
 dist/**/*
-!dist/index.d.ts
