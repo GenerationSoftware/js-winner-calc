@@ -1,6 +1,6 @@
 {
   "name": "@generationsoftware/js-winner-calc",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Calculates PoolTogether V5 winners in JavaScript.",
   "main": "dist/index.js",
   "type": "module",
