@@ -74,7 +74,7 @@ export const computeWinners = async ({
       }
       const { vaultTotalSupplyTwab, userTwabs } = await cachedTwabs[startTwabTimestamp]
       const debugInfo = JSON.stringify({ tier, numUsers: userTwabs.length, prizePoolAddress, vaultAddress, chainId })
-      console.log(`Computing wins for: ${debugInfo}`)
+      if (debug) console.log(`Computing wins for: ${debugInfo}`)
       const startTime = Date.now();
       const chunkWins = await computeWinsForTier(
         {
@@ -97,7 +97,7 @@ export const computeWinners = async ({
         if(!userData.prizes[tier]) { userData.prizes[tier] = [] }
         userData.prizes[tier].push(win.prizeIndex)
       }
-      console.log(`(${Date.now() - startTime} ms) Finished computing wins for: ${debugInfo}`)
+      if (debug) console.log(`(${Date.now() - startTime} ms) Finished computing wins for: ${debugInfo}`)
     }
   }))
 
