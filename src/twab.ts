@@ -7,7 +7,7 @@ export const getTwabs = async (
   vaultAddress: Address,
   userAddresses: Address[],
   timestamps: { start: number, end: number },
-  options?: { blockNumber?: bigint }
+  options?: { blockNumber?: bigint, debug?: boolean }
 ) => {
   const userTwabs: { address: Address, twab: bigint }[] = []
 
@@ -30,7 +30,7 @@ export const getTwabs = async (
   })
 
   if(multicallResults[0].status === 'failure') {
-    if (process.env.TWC_DEBUG) {
+    if (options?.debug) {
       console.error(multicallResults[0].error);
     }
     throw new Error(`Could not query vault twab for ${vaultAddress}.`)

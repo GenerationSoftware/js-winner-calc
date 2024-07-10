@@ -1,4 +1,4 @@
-import { prizePoolABI } from "./abi/prizePool"
+import { prizePoolABI } from "./abi/prizePool.js"
 import type { Address, ContractFunctionParameters, PublicClient } from "viem"
 
 export const getPrizePoolInfo = async (

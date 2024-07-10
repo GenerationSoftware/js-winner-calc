@@ -1,13 +1,13 @@
-# PoolTogether TEVM Winner Calculator
+# PoolTogether JS Winner Calculator
 
-A [TEVM](https://tevm.sh/)-assisted toolkit for efficiently calculating winners of a prize pool draw in Node.js or in a browser.
+This library calculates PoolTogether V5 winners completely in JavaScript for use in NodeJS or in a browser.
 
 ## Installation
 
 This library is installable as an NPM package using the following command:
 
 ```
-npm i @generationsoftware/tevm-winner-calc
+npm i @generationsoftware/js-winner-calc
 ```
 
 ## How to Calculate Winners for a Vault
@@ -16,7 +16,7 @@ npm i @generationsoftware/tevm-winner-calc
 > This script batches RPC queries for a given vault, so you'll need to run it for each vault that you want to check prizes for. If you are querying results for many users, it is recommended to use a private RPC endpoint to avoid public rate limits.
 
 ```js
-import { computeWinners } from "@generationsoftware/tevm-winner-calc";
+import { computeWinners } from "@generationsoftware/js-winner-calc";
 
 const winners = await computeWinners({
   chainId: 10,
@@ -110,8 +110,5 @@ const winners = await computeWinners({
 ## Local Development
 
 1. clone this repo
-2. install [foundry](https://book.getfoundry.sh/getting-started/installation)
-3. run `npm i` and then `forge install`
+3. run `npm i`
 4. run `npm run dev`
-
-> **WINDOWS INSTALLATION** If you are installing on windows, you may need to increase your max filepath setting on git ***before running forge install*** by running the following command as administrator: `git config --system core.longpaths true`
