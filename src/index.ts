@@ -15,8 +15,8 @@ const NUM_CANARY_TIERS = 2;
  * @param prizePoolAddress The prize pool to compute winners for
  * @param vaultAddress The vault to compute winners for
  * @param userAddresses The users that may be eligible for prizes
- * @param ignoreCanaries If true, the last two tiers (canary tiers) will be ignored. This speeds up the calculation significantly.
- * @param multicallBatchSize The maximum size (in bytes) for each calldata chunk.
+ * @param prizeTiers If provided, only prizes for the tiers within this array will be calculated
+ * @param multicallBatchSize The maximum size (in bytes) for each calldata chunk
  * @param blockNumber The block number to query at (requires an RPC node that supports historical queries)
  * @param debug Enable debug logs
  * @dev Example:
@@ -36,7 +36,7 @@ export const computeWinners = async ({
   prizePoolAddress,
   vaultAddress,
   userAddresses,
-  ignoreCanaries,
+  prizeTiers,
   multicallBatchSize,
   blockNumber,
   debug
@@ -46,7 +46,7 @@ export const computeWinners = async ({
   prizePoolAddress: Address,
   vaultAddress: Address,
   userAddresses: Address[],
-  ignoreCanaries?: boolean,
+  prizeTiers?: number[],
   multicallBatchSize?: number,
   blockNumber?: bigint,
   debug?: boolean
@@ -59,7 +59,7 @@ export const computeWinners = async ({
 
   await Promise.all(Object.keys(tierInfo).map(async (_tier) => {
     const tier = parseInt(_tier)
-    if (!ignoreCanaries || tier < prizePoolInfo.numTiers - NUM_CANARY_TIERS) {
+    if (!prizeTiers || prizeTiers.includes(tier)) {
       const vaultPortion = await getVaultPortion(client, prizePoolAddress, vaultAddress, { start: tierInfo[tier].startTwabDrawId, end: prizePoolInfo.lastAwardedDrawId })
       const startTwabTimestamp = tierInfo[tier].startTwabTimestamp
       if(cachedTwabs[startTwabTimestamp] === undefined) {

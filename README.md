@@ -49,16 +49,19 @@ The results will look like the following, with an array of **winners** and a map
 
 ## Optional Arguments
 
-### ignoreCanaries
+### prizeTiers
 
-Ignores the last two tiers (canary tiers) when computing wins. Enabling this will significantly speed up the calculation, but should only be used if you have no need for canary tier wins in your application.
+Enables the calculation to be limited to only the listed prize tiers. Calculating wins for lower tiers only can significantly speed up the calculation. If this list is not passed to the function call, all active tiers will be computed.
+
+> [!Note]
+> There is no validation of the tier numbers provided.
 
 #### Example:
 
 ```js
 const winners = await computeWinners({
   ...,
-  ignoreCanaries: true
+  prizeTiers: [0,1,5]
 })
 ```
 

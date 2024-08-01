@@ -15,7 +15,7 @@ const main = async () => {
     ],
     blockNumber: 121970626n,
     debug: true,
-    ignoreCanaries: true
+    prizeTiers: [0,1,2,3,4]
   });
   console.log(JSON.stringify(winners, null, '  '));
 }
