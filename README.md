@@ -82,6 +82,21 @@ const winners = await computeWinners({
 
 --------------------------------------------------------------------------------
 
+### multicallAddress
+
+Set the `multicallAddress` argument in the input json file to use a custom Multicall contract for RPC calls.
+
+#### Example:
+
+```js
+const winners = await computeWinners({
+  ...,
+  multicallAddress: '0xcA11bde05977b3631167028862bE2a173976CA11' // Gnosis Chiado testnet Multicall3 address
+})
+```
+
+--------------------------------------------------------------------------------
+
 ### blockNumber
 
 The `blockNumber` argument can be set to run the script at a specific block number instead of the current block. Must be either a number or string that can be parsed into a `BigInt`.
