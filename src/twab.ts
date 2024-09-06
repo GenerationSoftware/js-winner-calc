@@ -7,7 +7,7 @@ export const getTwabs = async (
   vaultAddress: Address,
   userAddresses: Address[],
   timestamps: { start: number, end: number },
-  options?: { blockNumber?: bigint, debug?: boolean }
+  options?: { blockNumber?: bigint, multicallAddress?: Address, debug?: boolean }
 ) => {
   const userTwabs: { address: Address, twab: bigint }[] = []
 
@@ -26,7 +26,8 @@ export const getTwabs = async (
         args: [vaultAddress, userAddress, BigInt(timestamps.start), BigInt(timestamps.end)]
       }))
     ],
-    blockNumber: options?.blockNumber
+    blockNumber: options?.blockNumber,
+    multicallAddress: options?.multicallAddress
   })
 
   if(multicallResults[0].status === 'failure') {

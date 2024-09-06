@@ -4,7 +4,7 @@ import type { Address, ContractFunctionParameters, PublicClient } from "viem"
 export const getPrizePoolInfo = async (
   client: PublicClient,
   prizePoolAddress: Address,
-  options?: { blockNumber?: bigint }
+  options?: { blockNumber?: bigint, multicallAddress?: Address }
 ) => {
   const multicallResults = await client.multicall({
     contracts: [
@@ -30,6 +30,7 @@ export const getPrizePoolInfo = async (
       },
     ],
     blockNumber: options?.blockNumber,
+    multicallAddress: options?.multicallAddress
   })
 
   if (multicallResults.some((i) => i.status === "failure")) {
@@ -62,7 +63,7 @@ export const getTierInfo = async (
   prizePoolAddress: Address,
   numTiers: number,
   lastAwardedDrawId: number,
-  options?: { blockNumber?: bigint }
+  options?: { blockNumber?: bigint, multicallAddress?: Address }
 ) => {
   const tierInfo: {
     [tier: number]: {
@@ -101,6 +102,7 @@ export const getTierInfo = async (
   const firstMulticallResults = await client.multicall({
     contracts: firstContracts,
     blockNumber: options?.blockNumber,
+    multicallAddress: options?.multicallAddress
   })
 
   if (firstMulticallResults.some((i) => i.status === "failure")) {
@@ -125,6 +127,7 @@ export const getTierInfo = async (
   const secondMulticallResults = await client.multicall({
     contracts: secondContracts,
     blockNumber: options?.blockNumber,
+    multicallAddress: options?.multicallAddress
   })
 
   if (secondMulticallResults.some((i) => i.status === "failure")) {

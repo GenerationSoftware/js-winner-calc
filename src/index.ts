@@ -17,6 +17,7 @@ const NUM_CANARY_TIERS = 2;
  * @param userAddresses The users that may be eligible for prizes
  * @param prizeTiers If provided, only prizes for the tiers within this array will be calculated
  * @param multicallBatchSize The maximum size (in bytes) for each calldata chunk
+ * @param multicallAddress If you need to provide your own custom multicall contract
  * @param blockNumber The block number to query at (requires an RPC node that supports historical queries)
  * @param debug Enable debug logs
  * @dev Example:
@@ -38,6 +39,7 @@ export const computeWinners = async ({
   userAddresses,
   prizeTiers,
   multicallBatchSize,
+  multicallAddress,
   blockNumber,
   debug
 }: {
@@ -48,13 +50,14 @@ export const computeWinners = async ({
   userAddresses: Address[],
   prizeTiers?: number[],
   multicallBatchSize?: number,
+  multicallAddress?: Address,
   blockNumber?: bigint,
   debug?: boolean
 }): Promise<Winner[]> => {
   const cachedTwabs: { [startTimestamp: number]: ReturnType<typeof getTwabs> } = {}
   const client = getClient(chainId, rpcUrl, { multicallBatchSize })
-  const prizePoolInfo = await getPrizePoolInfo(client, prizePoolAddress, { blockNumber })
-  const tierInfo = await getTierInfo(client, prizePoolAddress, prizePoolInfo.numTiers, prizePoolInfo.lastAwardedDrawId, { blockNumber })
+  const prizePoolInfo = await getPrizePoolInfo(client, prizePoolAddress, { blockNumber, multicallAddress })
+  const tierInfo = await getTierInfo(client, prizePoolAddress, prizePoolInfo.numTiers, prizePoolInfo.lastAwardedDrawId, { blockNumber, multicallAddress })
   const winnerMap = new Map<Address, Winner>()
 
   await Promise.all(Object.keys(tierInfo).map(async (_tier) => {
@@ -69,7 +72,7 @@ export const computeWinners = async ({
           vaultAddress,
           userAddresses,
           { start: startTwabTimestamp, end: prizePoolInfo.lastAwardedDrawClosedAt },
-          { blockNumber, debug }
+          { blockNumber, multicallAddress, debug }
         )
       }
       const { vaultTotalSupplyTwab, userTwabs } = await cachedTwabs[startTwabTimestamp]
