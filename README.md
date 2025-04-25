@@ -97,6 +97,21 @@ const winners = await computeWinners({
 
 --------------------------------------------------------------------------------
 
+### accountTwabBatchSize
+
+The `accountTwabBatchSize` optional value sets the number of account TWAB values to query per batch RPC call (default: 1024). If you are experiencing failed TWAB requests, this value may be set too high if your RPC provider can't handle large payloads, or it may be set too low if you are running into rate limits with your RPC provider.
+
+#### Example:
+
+```js
+const winners = await computeWinners({
+  ...,
+  accountTwabBatchSize: 1024 // Each TWAB batch query will contain up to 1024 account addresses
+})
+```
+
+--------------------------------------------------------------------------------
+
 ### blockNumber
 
 The `blockNumber` argument can be set to run the script at a specific block number instead of the current block. Must be either a number or string that can be parsed into a `BigInt`.

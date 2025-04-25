@@ -1,12 +1,10 @@
-import { Address} from "viem";
+import { Address} from "viem"
 import { getClient } from "./client.js"
 import { getPrizePoolInfo, getTierInfo, getVaultPortion } from "./prizePool.js"
 import { getTwabs } from "./twab.js"
-import { computeWinsForTier } from "./winCalculator.js";
+import { computeWinsForTier } from "./winCalculator.js"
 
-export type Winner = { user: Address, prizes: { [tier: number]: number[] } };
-
-const NUM_CANARY_TIERS = 2;
+export type Winner = { user: Address, prizes: { [tier: number]: number[] } }
 
 /**
  * @notice Computes the winning picks given the following prize pool, vault, and user information.
@@ -18,6 +16,7 @@ const NUM_CANARY_TIERS = 2;
  * @param prizeTiers If provided, only prizes for the tiers within this array will be calculated
  * @param multicallBatchSize The maximum size (in bytes) for each calldata chunk
  * @param multicallAddress If you need to provide your own custom multicall contract
+ * @param accountTwabBatchSize The number of account TWAB values to query per batch RPC call (default: 1024)
  * @param blockNumber The block number to query at (requires an RPC node that supports historical queries)
  * @param debug Enable debug logs
  * @dev Example:
@@ -40,6 +39,7 @@ export const computeWinners = async ({
   prizeTiers,
   multicallBatchSize,
   multicallAddress,
+  accountTwabBatchSize,
   blockNumber,
   debug
 }: {
@@ -51,6 +51,7 @@ export const computeWinners = async ({
   prizeTiers?: number[],
   multicallBatchSize?: number,
   multicallAddress?: Address,
+  accountTwabBatchSize?: number,
   blockNumber?: bigint,
   debug?: boolean
 }): Promise<Winner[]> => {
@@ -64,45 +65,47 @@ export const computeWinners = async ({
     const tier = parseInt(_tier)
     if (!prizeTiers || prizeTiers.includes(tier)) {
       const vaultPortion = await getVaultPortion(client, prizePoolAddress, vaultAddress, { start: tierInfo[tier].startTwabDrawId, end: prizePoolInfo.lastAwardedDrawId })
-      const startTwabTimestamp = tierInfo[tier].startTwabTimestamp
-      if(cachedTwabs[startTwabTimestamp] === undefined) {
-        cachedTwabs[startTwabTimestamp] = getTwabs(
-          client,
-          prizePoolInfo.twabControllerAddress,
-          vaultAddress,
-          userAddresses,
-          { start: startTwabTimestamp, end: prizePoolInfo.lastAwardedDrawClosedAt },
-          { blockNumber, multicallAddress, debug }
-        )
-      }
-      const { vaultTotalSupplyTwab, userTwabs } = await cachedTwabs[startTwabTimestamp]
-      const debugInfo = JSON.stringify({ tier, numUsers: userTwabs.length, prizePoolAddress, vaultAddress, chainId })
-      if (debug) console.log(`Computing wins for: ${debugInfo}`)
-      const startTime = Date.now();
-      const chunkWins = await computeWinsForTier(
-        {
-          winningRandomNumber: prizePoolInfo.randomNumber,
-          lastAwardedDrawId: prizePoolInfo.lastAwardedDrawId,
-          vaultAddress,
-          tier,
-          tierIndices: tierInfo[tier].indices,
-          tierOdds: tierInfo[tier].odds,
-          vaultPortion,
-          vaultTotalSupplyTwab
-        },
-        userTwabs
-      )
-      for (const win of chunkWins) {
-        if(!winnerMap.has(win.user)) {
-          winnerMap.set(win.user, { user: win.user, prizes: {} })
+      if (vaultPortion > 0n) {
+        const startTwabTimestamp = tierInfo[tier].startTwabTimestamp
+        if(cachedTwabs[startTwabTimestamp] === undefined) {
+          cachedTwabs[startTwabTimestamp] = getTwabs(
+            client,
+            prizePoolInfo.twabControllerAddress,
+            vaultAddress,
+            userAddresses,
+            { start: startTwabTimestamp, end: prizePoolInfo.lastAwardedDrawClosedAt },
+            { blockNumber, accountTwabBatchSize, debug }
+          )
         }
-        const userData = winnerMap.get(win.user) as Winner
-        if(!userData.prizes[tier]) { userData.prizes[tier] = [] }
-        userData.prizes[tier].push(win.prizeIndex)
+        const { vaultTotalSupplyTwab, userTwabs } = await cachedTwabs[startTwabTimestamp]
+        const debugInfo = JSON.stringify({ tier, numUsers: userTwabs.length, prizePoolAddress, vaultAddress, chainId })
+        if (debug) console.log(`Computing wins for: ${debugInfo}`)
+        const startTime = Date.now()
+        const chunkWins = await computeWinsForTier(
+          {
+            winningRandomNumber: prizePoolInfo.randomNumber,
+            lastAwardedDrawId: prizePoolInfo.lastAwardedDrawId,
+            vaultAddress,
+            tier,
+            tierIndices: tierInfo[tier].indices,
+            tierOdds: tierInfo[tier].odds,
+            vaultPortion,
+            vaultTotalSupplyTwab
+          },
+          userTwabs
+        )
+        for (const win of chunkWins) {
+          if(!winnerMap.has(win.user)) {
+            winnerMap.set(win.user, { user: win.user, prizes: {} })
+          }
+          const userData = winnerMap.get(win.user) as Winner
+          if(!userData.prizes[tier]) { userData.prizes[tier] = [] }
+          userData.prizes[tier].push(win.prizeIndex)
+        }
+        if (debug) console.log(`(${Date.now() - startTime} ms) Finished computing wins for: ${debugInfo}`)
       }
-      if (debug) console.log(`(${Date.now() - startTime} ms) Finished computing wins for: ${debugInfo}`)
     }
   }))
 
-  return [...winnerMap.values()];
+  return [...winnerMap.values()]
 }
